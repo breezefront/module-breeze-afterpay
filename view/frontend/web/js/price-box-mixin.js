@@ -3,6 +3,23 @@ define([
 ], ($) => {
     'use strict';
 
+    // Fix for invisible button at product page
+    if ($('script[src$="square-marketplace.js"]').length && !window.AfterPay) {
+        // Button checks window.AfterPay
+        // See Afterpay_Afterpay/js/view/container/express-checkout/button::_getIsVisible
+        window.AfterPay = {};
+
+        $.mixin('afterpayExpressCheckoutButton', {
+            initAfterpay: function (original) {
+                if (window.AfterPay.init && this.countryCode) {
+                    return original();
+                }
+
+                setTimeout(this.initAfterpay, 500);
+            }
+        });
+    }
+
     $.mixin('priceBox', {
         updatePrice: function (original, newPrices) {
             const result = original(newPrices);
